@@ -27,7 +27,6 @@
 #![doc(html_root_url = "https://docs.rs/bincode/1.3.3")]
 #![crate_name = "bincode"]
 #![crate_type = "rlib"]
-#![crate_type = "dylib"]
 
 #[macro_use]
 extern crate serde;
@@ -70,9 +69,9 @@ pub fn config() -> Config {
 ///
 /// ### Default Configuration:
 ///
-/// | Byte limit | Endianness | Int Encoding | Trailing Behavior |
-/// |------------|------------|--------------|-------------------|
-/// | Unlimited  | Little     | Varint       | Reject            |
+/// | Byte limit | Endianness | Int Encoding | Length/offset Encoding | Trailing Behavior |
+/// |------------|------------|--------------|--------------------------------------------|
+/// | Unlimited  | Little     | Varint       | Varint                 | Reject            |
 #[inline(always)]
 pub fn options() -> DefaultOptions {
     DefaultOptions::new()
@@ -94,6 +93,7 @@ where
 {
     DefaultOptions::new()
         .with_fixint_encoding()
+        .with_fixint_length_offset_encoding()
         .serialize_into(writer, value)
 }
 
@@ -109,6 +109,7 @@ where
 {
     DefaultOptions::new()
         .with_fixint_encoding()
+        .with_fixint_length_offset_encoding()
         .allow_trailing_bytes()
         .serialize(value)
 }
@@ -128,6 +129,7 @@ where
 {
     DefaultOptions::new()
         .with_fixint_encoding()
+        .with_fixint_length_offset_encoding()
         .allow_trailing_bytes()
         .deserialize_from(reader)
 }
@@ -149,6 +151,7 @@ where
 {
     DefaultOptions::new()
         .with_fixint_encoding()
+        .with_fixint_length_offset_encoding()
         .allow_trailing_bytes()
         .deserialize_from_custom(reader)
 }
@@ -164,6 +167,7 @@ where
 {
     DefaultOptions::new()
         .with_fixint_encoding()
+        .with_fixint_length_offset_encoding()
         .allow_trailing_bytes()
         .deserialize_in_place(reader, place)
 }
@@ -180,6 +184,7 @@ where
 {
     DefaultOptions::new()
         .with_fixint_encoding()
+        .with_fixint_length_offset_encoding()
         .allow_trailing_bytes()
         .deserialize(bytes)
 }
@@ -196,6 +201,7 @@ where
 {
     DefaultOptions::new()
         .with_fixint_encoding()
+        .with_fixint_length_offset_encoding()
         .allow_trailing_bytes()
         .serialized_size(value)
 }

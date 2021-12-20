@@ -119,7 +119,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
     }
 
     fn serialize_str(self, v: &str) -> Result<()> {
-        O::IntEncoding::serialize_len(self, v.len())?;
+        O::LengthEncoding::serialize_len(self, v.len())?;
         self.writer.write_all(v.as_bytes()).map_err(Into::into)
     }
 
@@ -130,7 +130,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<()> {
-        O::IntEncoding::serialize_len(self, v.len())?;
+        O::LengthEncoding::serialize_len(self, v.len())?;
         self.writer.write_all(v).map_err(Into::into)
     }
 
@@ -148,7 +148,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
         let len = len.ok_or(ErrorKind::SequenceMustHaveLength)?;
-        O::IntEncoding::serialize_len(self, len)?;
+        O::LengthEncoding::serialize_len(self, len)?;
         Ok(Compound { ser: self })
     }
 
@@ -171,13 +171,13 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeTupleVariant> {
-        O::IntEncoding::serialize_u32(self, variant_index)?;
+        O::LengthEncoding::serialize_u32(self, variant_index)?;
         Ok(Compound { ser: self })
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
         let len = len.ok_or(ErrorKind::SequenceMustHaveLength)?;
-        O::IntEncoding::serialize_len(self, len)?;
+        O::LengthEncoding::serialize_len(self, len)?;
         Ok(Compound { ser: self })
     }
 
@@ -192,7 +192,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeStructVariant> {
-        O::IntEncoding::serialize_u32(self, variant_index)?;
+        O::LengthEncoding::serialize_u32(self, variant_index)?;
         Ok(Compound { ser: self })
     }
 
@@ -213,7 +213,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
     where
         T: serde::ser::Serialize,
     {
-        O::IntEncoding::serialize_u32(self, variant_index)?;
+        O::LengthEncoding::serialize_u32(self, variant_index)?;
         value.serialize(self)
     }
 
@@ -223,7 +223,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
         variant_index: u32,
         _variant: &'static str,
     ) -> Result<()> {
-        O::IntEncoding::serialize_u32(self, variant_index)
+        O::LengthEncoding::serialize_u32(self, variant_index)
     }
 
     fn is_human_readable(&self) -> bool {
@@ -245,12 +245,13 @@ impl<O: Options> SizeChecker<O> {
     }
 
     fn add_discriminant(&mut self, idx: u32) -> Result<()> {
-        let bytes = O::IntEncoding::u32_size(idx);
+        let bytes = O::LengthEncoding::u32_size(idx);
+
         self.add_raw(bytes)
     }
 
     fn add_len(&mut self, len: usize) -> Result<()> {
-        let bytes = O::IntEncoding::len_size(len);
+        let bytes = O::LengthEncoding::len_size(len);
         self.add_raw(bytes)
     }
 }
@@ -365,7 +366,7 @@ impl<'a, O: Options> serde::Serializer for &'a mut SizeChecker<O> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeTupleVariant> {
-        self.add_raw(O::IntEncoding::u32_size(variant_index))?;
+        self.add_raw(O::LengthEncoding::u32_size(variant_index))?;
         Ok(SizeCompound { ser: self })
     }
 
